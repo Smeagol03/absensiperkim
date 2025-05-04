@@ -42,7 +42,15 @@
     </section>
     <section class="bg-gray-800 py-4">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-end">
+            <div class="flex justify-end space-x-4">
+                <button onclick="markAllPresent()"
+                    class="p-2 rounded-lg bg-green-500 text-white hover:bg-green-600 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Hadir Semua
+                </button>
                 <button onclick="resetAllAttendance()"
                     class="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -221,13 +229,14 @@
                         if (timeDisplay) {
                             timeDisplay.textContent = `Hadir pada ${new Date().toLocaleTimeString()}`;
                         }
-
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil!',
-                            text: 'Status kehadiran berhasil diperbarui',
-                            timer: 2000,
-                            showConfirmButton: false
+                            text: `Status kehadiran berhasil diperbarui`,
+                            timer: 1500,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end',
                         });
                     } else {
                         // Show modal for absence reason
@@ -315,6 +324,66 @@
                         }
                     });
                 });
+            };
+            // Function to mark all employees as present
+            window.markAllPresent = async () => {
+                try {
+                    const today = new Date().toISOString().split('T')[0];
+                    const timestamp = new Date().toISOString();
+
+                    // Show confirmation dialog
+                    const result = await Swal.fire({
+                        title: 'Tandai Semua Hadir',
+                        text: 'Apakah Anda yakin ingin menandai semua pegawai sebagai hadir?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Tandai Semua',
+                        cancelButtonText: 'Batal'
+                    });
+
+                    if (result.isConfirmed) {
+                        // Get all employees
+                        const employeesSnapshot = await get(employeesRef);
+                        if (!employeesSnapshot.exists()) {
+                            throw new Error('Tidak ada data pegawai yang ditemukan');
+                        }
+
+                        const employees = [];
+                        employeesSnapshot.forEach((childSnapshot) => {
+                            employees.push(childSnapshot.key);
+                        });
+
+                        // Mark all employees as present
+                        for (const employeeId of employees) {
+                            const employeeAttendanceRef = ref(database, `attendance/${employeeId}/${today}`);
+                            await set(employeeAttendanceRef, {
+                                status: 'hadir',
+                                timestamp: timestamp
+                            });
+
+                            // Update the time display
+                            const timeDisplay = document.getElementById(`attendanceTime-${employeeId}`);
+                            if (timeDisplay) {
+                                timeDisplay.textContent = `Hadir pada ${new Date().toLocaleTimeString()}`;
+                            }
+                        }
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Semua pegawai berhasil ditandai hadir',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error marking all employees as present:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menandai semua pegawai hadir. Silakan coba lagi.',
+                    });
+                }
             };
             // Function to reset all attendance
             window.resetAllAttendance = async () => {
@@ -531,7 +600,8 @@
                             </a>
                         </li>
                         <li>
-                            <a href="https://lotimkab.go.id" target="_blank" class="flex items-center group">
+                            <a href="https://portal.lomboktimurkab.go.id/" target="_blank"
+                                class="flex items-center group">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                     class="h-4 w-4 mr-2 text-yellow-400 group-hover:translate-x-1 transition-transform"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">

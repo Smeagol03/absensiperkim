@@ -11,6 +11,9 @@
     <!-- daisyUI CDN -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- ExportExcel -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 
 <body class="bg-gray-900">
@@ -79,7 +82,7 @@
                     <h3 class="text-lg leading-6 font-medium text-yellow-400">
                         Data Absensi Pegawai ASN
                     </h3>
-                    <button onclick="exportToExcel('asn')"
+                    <button onclick="exportASN()"
                         class="btn bg-green-500 hover:bg-green-600 text-white flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -129,7 +132,7 @@
                     <h3 class="text-lg leading-6 font-medium text-yellow-400">
                         Data Absensi Pegawai Honorer
                     </h3>
-                    <button onclick="exportToExcel('honorer')"
+                    <button onclick="exportHonorer()"
                         class="btn bg-green-500 hover:bg-green-600 text-white flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -169,162 +172,6 @@
         </div>
     </section>
 
-    <!-- SweerAlert -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.19.1/dist/sweetalert2.all.min.js"></script>
-    <!-- CustomJs -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCCVafGr8HTqH6zDY1eNeRjOmBT2rg-f-0",
-            authDomain: "absensi-fa91a.firebaseapp.com",
-            databaseURL: "https://absensi-fa91a-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "absensi-fa91a",
-            storageBucket: "absensi-fa91a.firebasestorage.app",
-            messagingSenderId: "56778176193",
-            appId: "1:56778176193:web:7e9c7599a11f4723470640",
-            measurementId: "G-7213NTVF6F"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        const employeesRef = ref(database, 'employees');
-        const honorerRef = ref(database, 'honorer_employees');
-
-        // Function to show ASN table
-        window.showASNTable = () => {
-            document.getElementById('asnTable').classList.remove('hidden');
-            document.getElementById('honorerTable').classList.add('hidden');
-        };
-
-        // Function to show Honorer table
-        window.showHonorerTable = () => {
-            document.getElementById('asnTable').classList.add('hidden');
-            document.getElementById('honorerTable').classList.remove('hidden');
-        };
-
-        // Load ASN data
-        onValue(employeesRef, (snapshot) => {
-            const employees = [];
-            snapshot.forEach((childSnapshot) => {
-                employees.push({
-                    id: childSnapshot.key,
-                    ...childSnapshot.val()
-                });
-            });
-
-            const tbody = document.getElementById('asnTableBody');
-            if (tbody) {
-                tbody.innerHTML = '';
-                employees.forEach((employee, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${index + 1}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${employee.jabatan}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${employee.pangkat}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${employee.golongan}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${employee.nama}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${employee.nip}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            <div id="attendanceTime-${employee.id}" class="text-xs text-gray-400"></div>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            }
-        });
-
-        // Load Honorer data
-        onValue(honorerRef, (snapshot) => {
-            const honorers = [];
-            snapshot.forEach((childSnapshot) => {
-                honorers.push({
-                    id: childSnapshot.key,
-                    ...childSnapshot.val()
-                });
-            });
-
-            const tbody = document.getElementById('honorerTableBody');
-            if (tbody) {
-                tbody.innerHTML = '';
-                honorers.forEach((honorer, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${index + 1}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${honorer.nama}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${honorer.bidang}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${honorer.jabatan}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            <div id="attendanceTime-honorer-${honorer.id}" class="text-xs text-gray-400"></div>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            }
-        });
-
-        // Load today's attendance data
-        const loadTodayAttendance = () => {
-            const today = new Date().toISOString().split('T')[0];
-            const attendanceRef = ref(database, 'attendance');
-            const honorerAttendanceRef = ref(database, 'honorer_attendance');
-
-            // Load ASN attendance
-            onValue(attendanceRef, (snapshot) => {
-                snapshot.forEach((employeeSnapshot) => {
-                    const employeeId = employeeSnapshot.key;
-                    const todayAttendance = employeeSnapshot.child(today).val();
-
-                    if (todayAttendance) {
-                        const timeDisplay = document.getElementById(`attendanceTime-${employeeId}`);
-                        if (timeDisplay) {
-                            if (todayAttendance.status === 'hadir') {
-                                timeDisplay.textContent = 'Hadir';
-                            } else {
-                                const reasonText = {
-                                    'sakit': 'Sakit',
-                                    'izin': 'Izin',
-                                    'tanpa_keterangan': 'Tanpa Keterangan'
-                                }[todayAttendance.reason];
-                                timeDisplay.textContent = `Tidak Hadir (${reasonText})`;
-                            }
-                        }
-                    }
-                });
-            });
-
-            // Load Honorer attendance
-            onValue(honorerAttendanceRef, (snapshot) => {
-                snapshot.forEach((employeeSnapshot) => {
-                    const employeeId = employeeSnapshot.key;
-                    const todayAttendance = employeeSnapshot.child(today).val();
-
-                    if (todayAttendance) {
-                        const timeDisplay = document.getElementById(`attendanceTime-honorer-${employeeId}`);
-                        if (timeDisplay) {
-                            if (todayAttendance.status === 'hadir') {
-                                timeDisplay.textContent = 'Hadir';
-                            } else {
-                                const reasonText = {
-                                    'sakit': 'Sakit',
-                                    'izin': 'Izin',
-                                    'tanpa_keterangan': 'Tanpa Keterangan'
-                                }[todayAttendance.reason];
-                                timeDisplay.textContent = `Tidak Hadir (${reasonText})`;
-                            }
-                        }
-                    }
-                });
-            });
-        };
-
-        // Call the function when page loads
-        loadTodayAttendance();
-    </script>
     <!-- Footer -->
     <footer class="bg-gradient-to-r from-gray-900 to-gray-800 text-gray-300 z-0">
         <div class="container mx-auto px-4 py-12">
@@ -434,7 +281,8 @@
                             </a>
                         </li>
                         <li>
-                            <a href="https://lotimkab.go.id" target="_blank" class="flex items-center group">
+                            <a href="https://portal.lomboktimurkab.go.id/" target="_blank"
+                                class="flex items-center group">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                     class="h-4 w-4 mr-2 text-yellow-400 group-hover:translate-x-1 transition-transform"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -487,6 +335,336 @@
             </div>
         </div>
     </footer>
+    <!-- SweerAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.19.1/dist/sweetalert2.all.min.js"></script>
+    <!-- CustomJs -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import {
+            getDatabase,
+            ref,
+            onValue,
+        } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCVafGr8HTqH6zDY1eNeRjOmBT2rg-f-0",
+            authDomain: "absensi-fa91a.firebaseapp.com",
+            databaseURL:
+                "https://absensi-fa91a-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "absensi-fa91a",
+            storageBucket: "absensi-fa91a.firebasestorage.app",
+            messagingSenderId: "56778176193",
+            appId: "1:56778176193:web:7e9c7599a11f4723470640",
+            measurementId: "G-7213NTVF6F",
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const employeesRef = ref(database, "employees");
+        const honorerRef = ref(database, "honorer_employees");
+
+        // Function to export ASN data to Excel
+        window.exportASN = async () => {
+            try {
+                // Create a new workbook
+                const workbook = new ExcelJS.Workbook();
+
+                // Load the template
+                await workbook.xlsx.load(await fetch('template_asn.xlsx').then(res => res.arrayBuffer()));
+
+                // Get the first worksheet
+                const worksheet = workbook.getWorksheet(1);
+
+                // Get the table data
+                const table = document.getElementById('asnTable');
+                const headerRow = table.querySelector('thead tr');
+                const headers = Array.from(headerRow.getElementsByTagName('th')).map(th => th.textContent.trim());
+                const rows = table.querySelector('tbody').getElementsByTagName('tr');
+
+                // Start from row 1 (or adjust as needed for your template)
+                let currentRow = 1;
+
+                // Add headers first
+                for (let i = 0; i < headers.length; i++) {
+                    const column = String.fromCharCode(65 + i); // A, B, C, etc.
+                    worksheet.getCell(`${column}${currentRow}`).value = headers[i];
+                }
+                currentRow++;
+
+                // Iterate through table rows and add to worksheet
+                for (let i = 0; i < rows.length; i++) {
+                    const cells = rows[i].getElementsByTagName('td');
+
+                    // Add all cell data
+                    for (let j = 0; j < cells.length; j++) {
+                        const cellValue = cells[j].textContent.trim();
+                        const column = String.fromCharCode(65 + j); // A, B, C, etc.
+                        worksheet.getCell(`${column}${currentRow}`).value = cellValue;
+                    }
+
+                    currentRow++;
+                }
+
+                // Generate Excel file
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+                // Get current date for filename
+                const today = new Date();
+                const dateStr = today.toISOString().split('T')[0];
+
+                // Save the file
+                saveAs(blob, `Absensi_ASN_${dateStr}.xlsx`);
+
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Data berhasil diekspor ke Excel',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Gagal mengekspor data ke Excel'
+                });
+            }
+        };
+        // Export Honorer data to Excel
+        window.exportHonorer = async () => {
+            try {
+                // Get table data
+                const table = document.getElementById('honorerTableBody');
+                if (!table) {
+                    throw new Error('Table not found');
+                }
+
+                const rows = table.getElementsByTagName('tr');
+                if (rows.length === 0) {
+                    throw new Error('No data to export');
+                }
+
+                // Define headers based on table structure
+                const headers = ['No', 'Nama', 'Bidang', 'Jabatan', 'Status'];
+
+                // Create a new workbook and add a worksheet
+                const workbook = new ExcelJS.Workbook();
+
+                // Try to load the template first
+                try {
+                    const response = await fetch('template_honorer.xlsx');
+                    const arrayBuffer = await response.arrayBuffer();
+                    await workbook.xlsx.load(arrayBuffer);
+                } catch (templateError) {
+                    console.warn('Template not found, creating new workbook:', templateError);
+                    workbook.addWorksheet('Absensi Honorer');
+                }
+
+                const worksheet = workbook.getWorksheet(1) || workbook.addWorksheet('Absensi Honorer');
+
+                // Start from row 1 (or adjust as needed for your template)
+                let currentRow = 1;
+
+                // Add headers first
+                for (let i = 0; i < headers.length; i++) {
+                    const column = String.fromCharCode(65 + i); // A, B, C, etc.
+                    worksheet.getCell(`${column}${currentRow}`).value = headers[i];
+                }
+                currentRow++;
+
+                // Iterate through table rows and add to worksheet
+                for (let i = 0; i < rows.length; i++) {
+                    const cells = rows[i].getElementsByTagName('td');
+
+                    // Add all cell data
+                    for (let j = 0; j < cells.length; j++) {
+                        const cellValue = cells[j].textContent.trim();
+                        const column = String.fromCharCode(65 + j); // A, B, C, etc.
+                        worksheet.getCell(`${column}${currentRow}`).value = cellValue;
+                    }
+
+                    currentRow++;
+                }
+
+                // Generate Excel file
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+                // Get current date for filename
+                const today = new Date();
+                const dateStr = today.toISOString().split('T')[0];
+
+                // Save the file
+                saveAs(blob, `Absensi_Honorer_${dateStr}.xlsx`);
+
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Data berhasil diekspor ke Excel',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Gagal mengekspor data ke Excel'
+                });
+            }
+        };
+
+        window.showASNTable = () => {
+            document.getElementById("asnTable").classList.remove("hidden");
+            document.getElementById("honorerTable").classList.add("hidden");
+        };
+
+        // Function to show Honorer table
+        window.showHonorerTable = () => {
+            document.getElementById("asnTable").classList.add("hidden");
+            document.getElementById("honorerTable").classList.remove("hidden");
+        };
+
+        // Load ASN data
+        onValue(employeesRef, (snapshot) => {
+            const employees = [];
+            snapshot.forEach((childSnapshot) => {
+                employees.push({
+                    id: childSnapshot.key,
+                    ...childSnapshot.val(),
+                });
+            });
+
+            const tbody = document.getElementById("asnTableBody");
+            if (tbody) {
+                tbody.innerHTML = "";
+                employees.forEach((employee, index) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${index + 1
+                        }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${employee.jabatan
+                        }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${employee.pangkat
+                        }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${employee.golongan
+                        }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${employee.nama
+                        }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${employee.nip
+                        }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <div id="attendanceTime-${employee.id
+                        }" class="text-xs text-gray-400"></div>
+                </td>
+            `;
+                    tbody.appendChild(row);
+                });
+            }
+        });
+
+        // Load Honorer data
+        onValue(honorerRef, (snapshot) => {
+            const honorers = [];
+            snapshot.forEach((childSnapshot) => {
+                honorers.push({
+                    id: childSnapshot.key,
+                    ...childSnapshot.val(),
+                });
+            });
+
+            const tbody = document.getElementById("honorerTableBody");
+            if (tbody) {
+                tbody.innerHTML = "";
+                honorers.forEach((honorer, index) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${index + 1
+                        }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${honorer.nama
+                        }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${honorer.bidang
+                        }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${honorer.jabatan
+                        }</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <div id="attendanceTime-honorer-${honorer.id
+                        }" class="text-xs text-gray-400"></div>
+                </td>
+            `;
+                    tbody.appendChild(row);
+                });
+            }
+        });
+
+        // Load today's attendance data
+        const loadTodayAttendance = () => {
+            const today = new Date().toISOString().split("T")[0];
+            const attendanceRef = ref(database, "attendance");
+            const honorerAttendanceRef = ref(database, "honorer_attendance");
+
+            // Load ASN attendance
+            onValue(attendanceRef, (snapshot) => {
+                snapshot.forEach((employeeSnapshot) => {
+                    const employeeId = employeeSnapshot.key;
+                    const todayAttendance = employeeSnapshot.child(today).val();
+
+                    if (todayAttendance) {
+                        const timeDisplay = document.getElementById(
+                            `attendanceTime-${employeeId}`
+                        );
+                        if (timeDisplay) {
+                            if (todayAttendance.status === "hadir") {
+                                timeDisplay.textContent = "Hadir";
+                            } else {
+                                const reasonText = {
+                                    sakit: "Sakit",
+                                    izin: "Izin",
+                                    tanpa_keterangan: "Tanpa Keterangan",
+                                }[todayAttendance.reason];
+                                timeDisplay.textContent = `Tidak Hadir (${reasonText})`;
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Load Honorer attendance
+            onValue(honorerAttendanceRef, (snapshot) => {
+                snapshot.forEach((employeeSnapshot) => {
+                    const employeeId = employeeSnapshot.key;
+                    const todayAttendance = employeeSnapshot.child(today).val();
+
+                    if (todayAttendance) {
+                        const timeDisplay = document.getElementById(
+                            `attendanceTime-honorer-${employeeId}`
+                        );
+                        if (timeDisplay) {
+                            if (todayAttendance.status === "hadir") {
+                                timeDisplay.textContent = "Hadir";
+                            } else {
+                                const reasonText = {
+                                    sakit: "Sakit",
+                                    izin: "Izin",
+                                    tanpa_keterangan: "Tanpa Keterangan",
+                                }[todayAttendance.reason];
+                                timeDisplay.textContent = `Tidak Hadir (${reasonText})`;
+                            }
+                        }
+                    }
+                });
+            });
+        };
+        // Call the function when page loads
+        loadTodayAttendance();
+    </script>
 </body>
 
 </html>
